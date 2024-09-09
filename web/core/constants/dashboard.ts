@@ -276,14 +276,6 @@ export const SIDEBAR_WORKSPACE_MENU_ITEMS: {
     Icon: Briefcase,
   },
   {
-    key: "active-cycles",
-    label: "Active Cycles",
-    href: `/active-cycles`,
-    access: EUserWorkspaceRoles.GUEST,
-    highlight: (pathname: string, baseUrl: string) => pathname === `${baseUrl}/active-cycles/`,
-    Icon: ContrastIcon,
-  },
-  {
     key: "analytics",
     label: "Analytics",
     href: `/analytics`,
