@@ -58,7 +58,7 @@ const KanbanIssueDetailsBlock: React.FC<IssueDetailsBlockProps> = observer((prop
     e.preventDefault();
   };
 
-  const matchedImage = issue?.description_html.match(/<img[^>]+src="([^">]+)"/)[1]
+  const matchedImage = issue?.description_html?.match(/<img[^>]+src="([^">]+)"/)[1]
 
   return (
     <>
