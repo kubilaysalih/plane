@@ -58,7 +58,11 @@ export const IssueAttachmentsDetail: FC<TIssueAttachmentsDetail> = observer((pro
       <div className="flex h-[60px] items-center justify-between gap-1 rounded-md border-[2px] border-custom-border-200 bg-custom-background-100 px-4 py-2 text-sm">
         <Link href={attachment.asset} target="_blank" rel="noopener noreferrer">
           <div className="flex items-center gap-3">
-            <div className="h-7 w-7">{getFileIcon(getFileExtension(attachment.asset), 28)}</div>
+            {['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(getFileExtension(attachment.asset)) ? (
+              <img src={attachment.asset} width="55px" />
+            ) : (
+              <div className="h-7 w-7">{getFileIcon(getFileExtension(attachment.asset), 28)}</div>
+            )}
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <Tooltip tooltipContent={getFileName(attachment.attributes.name)} isMobile={isMobile}>
@@ -66,9 +70,8 @@ export const IssueAttachmentsDetail: FC<TIssueAttachmentsDetail> = observer((pro
                 </Tooltip>
                 <Tooltip
                   isMobile={isMobile}
-                  tooltipContent={`${
-                    getUserDetails(attachment.updated_by)?.display_name ?? ""
-                  } uploaded on ${renderFormattedDate(attachment.updated_at)}`}
+                  tooltipContent={`${getUserDetails(attachment.updated_by)?.display_name ?? ""
+                    } uploaded on ${renderFormattedDate(attachment.updated_at)}`}
                 >
                   <span>
                     <AlertCircle className="h-3 w-3" />
