@@ -58,6 +58,8 @@ const KanbanIssueDetailsBlock: React.FC<IssueDetailsBlockProps> = observer((prop
     e.preventDefault();
   };
 
+  const matchedImage = issue.description_html.match(/<img[^>]+src="([^">]+)"/)[1]
+
   return (
     <>
       <WithDisplayPropertiesHOC displayProperties={displayProperties || {}} displayPropertyKey="key">
@@ -78,18 +80,18 @@ const KanbanIssueDetailsBlock: React.FC<IssueDetailsBlockProps> = observer((prop
           </div>
         </div>
       </WithDisplayPropertiesHOC>
-
       {issue?.is_draft ? (
         <Tooltip tooltipContent={issue.name} isMobile={isMobile}>
           <span>{issue.name}</span>
         </Tooltip>
       ) : (
-        <div className="w-full line-clamp-1 text-sm text-custom-text-100 mb-1.5">
+        <div className="w-full line-clamp-1 font-medium text-sm text-custom-text-300 mb-1.5">
           <Tooltip tooltipContent={issue.name} isMobile={isMobile}>
             <span>{issue.name}</span>
           </Tooltip>
         </div>
       )}
+      {matchedImage && <img class="w-full h-auto" src={matchedImage} />}
 
       <IssueProperties
         className="flex flex-wrap items-center gap-2 whitespace-nowrap text-custom-text-300 pt-1.5"
