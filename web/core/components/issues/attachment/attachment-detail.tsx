@@ -59,7 +59,7 @@ export const IssueAttachmentsDetail: FC<TIssueAttachmentsDetail> = observer((pro
         <Link href={attachment.asset} target="_blank" rel="noopener noreferrer">
           <div className="flex items-center gap-3">
             {['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(getFileExtension(attachment.asset)) ? (
-              <img src={attachment.asset} width="55px" />
+              <img src={attachment.asset} height="50px" width="50px" />
             ) : (
               <div className="h-7 w-7">{getFileIcon(getFileExtension(attachment.asset), 28)}</div>
             )}
