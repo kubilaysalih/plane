@@ -1,6 +1,11 @@
+
+import { ReactNode, useEffect } from "react";
+
 import { observer } from "mobx-react";
 // ui
-import { Tooltip } from "@plane/ui";
+import { Tooltip, TOAST_TYPE, setToast } from "@plane/ui";
+
+import {  useUser } from "@/hooks/store";
 // hooks
 import { usePlatformOS } from "@/hooks/use-platform-os";
 // assets
@@ -8,6 +13,17 @@ import packageJson from "package.json";
 
 export const WorkspaceEditionBadge = observer(() => {
   const { isMobile } = usePlatformOS();
+  const { data: currentUser } = useUser();
+
+  useEffect(() => {
+    if(!currentUser.avatar) {
+      setToast({
+        type: TOAST_TYPE.ERROR,
+        title: "Please upload avatar!",
+        message: "cuz avatars are so cute 😁",
+      })
+    }
+  }, [currentUser.avatar])
 
   return (
     <Tooltip tooltipContent={`Version: v${packageJson.version}`} isMobile={isMobile}>
