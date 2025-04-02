@@ -45,6 +45,7 @@ def get_default_display_properties():
         "key": True,
         "labels": True,
         "link": True,
+        "workload": True,
         "priority": True,
         "start_date": True,
         "state": True,

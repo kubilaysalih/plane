@@ -32,6 +32,7 @@ export const IssuesListLayoutRoot = observer((props: Props) => {
       state: true,
       labels: true,
       priority: true,
+      workload: true,
       due_date: true,
     }),
     []

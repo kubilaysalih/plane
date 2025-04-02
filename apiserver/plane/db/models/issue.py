@@ -27,6 +27,7 @@ def get_default_properties():
         "labels": True,
         "key": True,
         "priority": True,
+        "workload": True,
         "state": True,
         "sub_issue_count": True,
         "link": True,
@@ -40,6 +41,7 @@ def get_default_properties():
 def get_default_filters():
     return {
         "priority": None,
+        "workload": None,
         "state": None,
         "state_group": None,
         "assignees": None,
@@ -74,6 +76,7 @@ def get_default_display_properties():
         "labels": True,
         "link": True,
         "priority": True,
+        "workload": True,
         "start_date": True,
         "state": True,
         "sub_issue_count": True,
@@ -109,6 +112,35 @@ class Issue(ProjectBaseModel):
         ("low", "Low"),
         ("none", "None"),
     )
+
+    WORKLOAD_CHOICES = (
+        ("30m", "30 minutes"),
+        ("1h", "1 hour"),
+        ("2h", "2 hours"),
+        ("3h", "3 hours"),
+        ("4h", "4 hours"),
+        ("6h", "6 hours"),
+        ("8h", "8 hours"),
+        ("1d", "1 day"),
+        ("1.5d", "1.5 days"),
+        ("2d", "2 days"),
+        ("3d", "3 days"),
+        ("4d", "4 days"),
+        ("5d", "5 days"),
+        ("1w", "1 week"),
+        ("2w", "2 weeks"),
+        ("3w", "3 weeks"),
+        ("1m", "1 month"),
+        ("1.5m", "1.5 months"),
+        ("2m", "2 months"),
+        ("3m", "3 months"),
+        ("4m", "4 months"),
+        ("5m", "5 months"),
+        ("6m", "6 months"),
+        ("9m", "9 months"),
+        ("1y", "1 year"),
+    )
+
     parent = models.ForeignKey(
         "self",
         on_delete=models.CASCADE,
@@ -143,6 +175,13 @@ class Issue(ProjectBaseModel):
         choices=PRIORITY_CHOICES,
         verbose_name="Issue Priority",
         default="none",
+    )
+    workload = models.CharField(
+        max_length=30,
+        choices=WORKLOAD_CHOICES,
+        verbose_name="Issue Workload",
+        null=True,
+        blank=True,
     )
     start_date = models.DateField(null=True, blank=True)
     target_date = models.DateField(null=True, blank=True)
@@ -670,6 +709,14 @@ class IssueVersion(ProjectBaseModel):
         ("none", "None"),
     )
 
+    WORKLOAD_CHOICES = (
+        ("1h", "1h"),
+        ("2h", "2h"),
+        ("4h", "4h"),
+        ("8h", "8h"),
+        ("1day", "1day"),
+    )
+
     parent = models.UUIDField(blank=True, null=True)
     state = models.UUIDField(blank=True, null=True)
     estimate_point = models.UUIDField(blank=True, null=True)
@@ -679,6 +726,13 @@ class IssueVersion(ProjectBaseModel):
         choices=PRIORITY_CHOICES,
         verbose_name="Issue Priority",
         default="none",
+    )
+    workload = models.CharField(
+        max_length=30,
+        choices=WORKLOAD_CHOICES,
+        verbose_name="Issue Workload",
+        null=True,
+        blank=True,
     )
     start_date = models.DateField(null=True, blank=True)
     target_date = models.DateField(null=True, blank=True)
@@ -743,6 +797,7 @@ class IssueVersion(ProjectBaseModel):
                 estimate_point=issue.estimate_point_id,
                 name=issue.name,
                 priority=issue.priority,
+                workload=issue.workload,
                 start_date=issue.start_date,
                 target_date=issue.target_date,
                 assignees=list(

@@ -22,6 +22,7 @@ import {
   ModuleDropdown,
   CycleDropdown,
   StateDropdown,
+  WorkloadDropdown,
 } from "@/components/dropdowns";
 // constants
 // helpers
@@ -125,6 +126,21 @@ export const IssueProperties: React.FC<IIssueProperties> = observer((props) => {
           path: pathname,
           updates: {
             changed_property: "priority",
+            change_details: value,
+          },
+        });
+      });
+  };
+
+  const handleWorkload = (value: TIssuePriorities) => {
+    if (updateIssue)
+      updateIssue(issue.project_id, issue.id, { workload: value }).then(() => {
+        captureIssueEvent({
+          eventName: ISSUE_UPDATED,
+          payload: { ...issue, state: "SUCCESS", element: currentLayout },
+          path: pathname,
+          updates: {
+            changed_property: "workload",
             change_details: value,
           },
         });
@@ -301,6 +317,20 @@ export const IssueProperties: React.FC<IIssueProperties> = observer((props) => {
           <PriorityDropdown
             value={issue?.priority}
             onChange={handlePriority}
+            disabled={isReadOnly}
+            buttonVariant="border-without-text"
+            buttonClassName="border"
+            renderByDefault={isMobile}
+            showTooltip
+          />
+        </div>
+      </WithDisplayPropertiesHOC>
+
+      <WithDisplayPropertiesHOC displayProperties={displayProperties} displayPropertyKey="workload">
+        <div className="h-5" onFocus={handleEventPropagation} onClick={handleEventPropagation}>
+          <WorkloadDropdown
+            value={issue?.workload}
+            onChange={handleWorkload}
             disabled={isReadOnly}
             buttonVariant="border-without-text"
             buttonClassName="border"

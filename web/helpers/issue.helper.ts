@@ -283,6 +283,7 @@ export const getComputedDisplayProperties = (
   due_date: displayProperties?.due_date ?? true,
   labels: displayProperties?.labels ?? true,
   priority: displayProperties?.priority ?? true,
+  workload: displayProperties?.workload ?? true,
   state: displayProperties?.state ?? true,
   sub_issue_count: displayProperties?.sub_issue_count ?? true,
   attachment_count: displayProperties?.attachment_count ?? true,

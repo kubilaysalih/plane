@@ -2,6 +2,8 @@
 from django.utils import timezone
 from lxml import html
 from django.db import IntegrityError
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 
 #  Third party imports
 from rest_framework import serializers
@@ -28,10 +30,6 @@ from .module import ModuleLiteSerializer, ModuleSerializer
 from .state import StateLiteSerializer
 from .user import UserLiteSerializer
 
-# Django imports
-from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator
-
 
 class IssueSerializer(BaseSerializer):
     assignees = serializers.ListField(
@@ -41,6 +39,7 @@ class IssueSerializer(BaseSerializer):
         write_only=True,
         required=False,
     )
+    workload = serializers.CharField(required=False, allow_null=True)
 
     labels = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(
@@ -448,6 +447,7 @@ class IssueExpandSerializer(BaseSerializer):
     labels = LabelLiteSerializer(read_only=True, many=True)
     assignees = UserLiteSerializer(read_only=True, many=True)
     state = StateLiteSerializer(read_only=True)
+    workload = serializers.CharField(read_only=True)
 
     class Meta:
         model = Issue

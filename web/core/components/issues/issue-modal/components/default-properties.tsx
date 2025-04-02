@@ -18,6 +18,7 @@ import {
   EstimateDropdown,
   ModuleDropdown,
   PriorityDropdown,
+  WorkloadDropdown,
   MemberDropdown,
   StateDropdown,
 } from "@/components/dropdowns";
@@ -117,6 +118,23 @@ export const IssueDefaultProperties: React.FC<TIssueDefaultPropertiesProps> = ob
               }}
               buttonVariant="border-with-text"
               tabIndex={getIndex("priority")}
+            />
+          </div>
+        )}
+      />
+      <Controller
+        control={control}
+        name="workload"
+        render={({ field: { value, onChange } }) => (
+          <div className="h-7">
+            <WorkloadDropdown
+              value={value}
+              onChange={(workload) => {
+                onChange(workload);
+                handleFormChange();
+              }}
+              buttonVariant="border-with-text"
+              tabIndex={getIndex("workload")}
             />
           </div>
         )}

@@ -173,6 +173,7 @@ def create_issue_version(issue: Issue, related_data: Dict) -> Optional[IssueVers
             estimate_point=issue.estimate_point_id,
             name=issue.name,
             priority=issue.priority,
+            workload=issue.workload,
             start_date=issue.start_date,
             target_date=issue.target_date,
             assignees=related_data["assignees"].get(issue.id, []),

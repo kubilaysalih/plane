@@ -171,7 +171,7 @@ export const SidebarHelpSection: React.FC<WorkspaceHelpSectionProps> = observer(
           <Tooltip tooltipContent={`${isCollapsed ? "Expand" : "Hide"}`} isMobile={isMobile}>
             <button
               type="button"
-              className={`grid place-items-center rounded-md p-1 text-custom-text-200 outline-none hover:bg-custom-background-90 hover:text-custom-text-100 ${
+              className={`grid place-items-center rounded-md p-2 text-custom-text-200 outline-none hover:bg-custom-background-90 hover:text-custom-text-100 ${
                 isCollapsed ? "w-full" : ""
               }`}
               onClick={() => toggleSidebar()}

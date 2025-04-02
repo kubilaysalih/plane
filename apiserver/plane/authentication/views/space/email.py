@@ -17,7 +17,6 @@ from plane.authentication.adapter.error import (
     AUTHENTICATION_ERROR_CODES,
     AuthenticationException,
 )
-from plane.utils.path_validator import validate_next_path
 
 
 class SignInAuthSpaceEndpoint(View):
@@ -33,7 +32,7 @@ class SignInAuthSpaceEndpoint(View):
             )
             params = exc.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
 
@@ -52,7 +51,7 @@ class SignInAuthSpaceEndpoint(View):
             )
             params = exc.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
 
@@ -68,7 +67,7 @@ class SignInAuthSpaceEndpoint(View):
             )
             params = exc.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
 
@@ -83,7 +82,7 @@ class SignInAuthSpaceEndpoint(View):
             )
             params = exc.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
 
@@ -100,7 +99,7 @@ class SignInAuthSpaceEndpoint(View):
         except AuthenticationException as e:
             params = e.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
 
@@ -118,7 +117,7 @@ class SignUpAuthSpaceEndpoint(View):
             )
             params = exc.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
 
@@ -136,7 +135,7 @@ class SignUpAuthSpaceEndpoint(View):
             )
             params = exc.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
         # Validate the email
@@ -152,7 +151,7 @@ class SignUpAuthSpaceEndpoint(View):
             )
             params = exc.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
 
@@ -167,7 +166,7 @@ class SignUpAuthSpaceEndpoint(View):
             )
             params = exc.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)
 
@@ -184,6 +183,6 @@ class SignUpAuthSpaceEndpoint(View):
         except AuthenticationException as e:
             params = e.get_error_dict()
             if next_path:
-                params["next_path"] = str(validate_next_path(next_path))
+                params["next_path"] = str(next_path)
             url = f"{base_host(request=request, is_space=True)}?{urlencode(params)}"
             return HttpResponseRedirect(url)

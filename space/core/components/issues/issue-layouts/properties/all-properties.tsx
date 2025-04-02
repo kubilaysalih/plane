@@ -23,6 +23,7 @@ import { WithDisplayPropertiesHOC } from "@/components/issues/issue-layouts/with
 import { getDate } from "@/helpers/date-time.helper";
 //// hooks
 import { IIssue } from "@/types/issue";
+import { IssueBlockWorkload } from "./workload";
 
 export interface IIssueProperties {
   issue: IIssue;
@@ -57,6 +58,12 @@ export const IssueProperties: React.FC<IIssueProperties> = observer((props) => {
       <WithDisplayPropertiesHOC displayProperties={displayProperties} displayPropertyKey="priority">
         <div className="h-5">
           <IssueBlockPriority priority={issue.priority} />
+        </div>
+      </WithDisplayPropertiesHOC>
+
+      <WithDisplayPropertiesHOC displayProperties={displayProperties} displayPropertyKey="workload">
+        <div className="h-5">
+          <IssueBlockWorkload workload={issue.workload} />
         </div>
       </WithDisplayPropertiesHOC>
 

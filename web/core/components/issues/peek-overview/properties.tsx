@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 import { observer } from "mobx-react";
-import { Signal, Tag, Triangle, LayoutPanelTop, CalendarClock, CalendarCheck2, Users, UserCircle2 } from "lucide-react";
+import { Signal, Tag, Triangle, LayoutPanelTop, CalendarClock, CalendarCheck2, Users, UserCircle2, Clock } from "lucide-react";
 // i18n
 import { useTranslation } from "@plane/i18n";
 // ui icons
@@ -14,6 +14,7 @@ import {
   PriorityDropdown,
   MemberDropdown,
   StateDropdown,
+  WorkloadDropdown,
 } from "@/components/dropdowns";
 import { ButtonAvatars } from "@/components/dropdowns/member/avatar";
 import { IssueCycleSelect, IssueModuleSelect, IssueLabel, TIssueOperations } from "@/components/issues";
@@ -115,6 +116,22 @@ export const PeekOverviewProperties: FC<IPeekOverviewProperties> = observer((pro
           <PriorityDropdown
             value={issue?.priority}
             onChange={(val) => issueOperations.update(workspaceSlug, projectId, issueId, { priority: val })}
+            disabled={disabled}
+            buttonVariant="border-with-text"
+            className="w-3/4 flex-grow rounded px-2 hover:bg-custom-background-80 group"
+            buttonContainerClassName="w-full text-left"
+            buttonClassName="w-min h-auto whitespace-nowrap"
+          />
+        </div>
+
+        <div className="flex w-full items-center gap-3 h-8">
+          <div className="flex items-center gap-1 w-1/4 flex-shrink-0 text-sm text-custom-text-300">
+            <Clock className="h-4 w-4 flex-shrink-0" />
+            <span>{t("common.workload")}</span>
+          </div>
+          <WorkloadDropdown
+            value={issue?.workload}
+            onChange={(val) => issueOperations.update(workspaceSlug, projectId, issueId, { workload: val })}
             disabled={disabled}
             buttonVariant="border-with-text"
             className="w-3/4 flex-grow rounded px-2 hover:bg-custom-background-80 group"

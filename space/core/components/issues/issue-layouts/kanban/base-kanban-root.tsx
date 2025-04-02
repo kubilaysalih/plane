@@ -26,6 +26,7 @@ export const IssueKanbanLayoutRoot: React.FC<Props> = observer((props: Props) =>
       state: true,
       labels: true,
       priority: true,
+      workload: true,
       due_date: true,
     }),
     []

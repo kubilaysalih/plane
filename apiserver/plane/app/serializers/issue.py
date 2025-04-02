@@ -51,6 +51,7 @@ class IssueFlatSerializer(BaseSerializer):
             "description",
             "description_html",
             "priority",
+            "workload",
             "start_date",
             "target_date",
             "sequence_id",
@@ -90,6 +91,7 @@ class IssueCreateSerializer(BaseSerializer):
     )
     project_id = serializers.UUIDField(source="project.id", read_only=True)
     workspace_id = serializers.UUIDField(source="workspace.id", read_only=True)
+    workload = serializers.CharField(required=False, allow_null=True)
 
     class Meta:
         model = Issue
@@ -335,6 +337,7 @@ class IssueRelationSerializer(BaseSerializer):
     relation_type = serializers.CharField(read_only=True)
     state_id = serializers.UUIDField(source="related_issue.state.id", read_only=True)
     priority = serializers.CharField(source="related_issue.priority", read_only=True)
+    workload = serializers.CharField(source="related_issue.workload", read_only=True)
     assignee_ids = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=User.objects.all()),
         write_only=True,
@@ -351,6 +354,7 @@ class IssueRelationSerializer(BaseSerializer):
             "name",
             "state_id",
             "priority",
+            "workload"
             "assignee_ids",
         ]
         read_only_fields = ["workspace", "project"]
@@ -366,6 +370,7 @@ class RelatedIssueSerializer(BaseSerializer):
     relation_type = serializers.CharField(read_only=True)
     state_id = serializers.UUIDField(source="issue.state.id", read_only=True)
     priority = serializers.CharField(source="issue.priority", read_only=True)
+    workload = serializers.CharField(source="issue.workload", read_only=True)
     assignee_ids = serializers.ListField(
         child=serializers.PrimaryKeyRelatedField(queryset=User.objects.all()),
         write_only=True,
@@ -380,6 +385,7 @@ class RelatedIssueSerializer(BaseSerializer):
             "sequence_id",
             "relation_type",
             "name",
+            "workload",
             "state_id",
             "priority",
             "assignee_ids",
@@ -650,6 +656,7 @@ class IssueIntakeSerializer(DynamicBaseSerializer):
             "priority",
             "sequence_id",
             "project_id",
+            "workload",
             "created_at",
             "label_ids",
             "created_by",
@@ -681,6 +688,7 @@ class IssueSerializer(DynamicBaseSerializer):
             "completed_at",
             "estimate_point",
             "priority",
+            "workload",
             "start_date",
             "target_date",
             "sequence_id",
@@ -739,6 +747,7 @@ class IssuePublicSerializer(BaseSerializer):
             "project",
             "project_detail",
             "workspace",
+            "workload",
             "priority",
             "target_date",
             "reactions",
@@ -766,6 +775,7 @@ class IssueVersionDetailSerializer(BaseSerializer):
             "state",
             "estimate_point",
             "name",
+            "workload",
             "priority",
             "start_date",
             "target_date",

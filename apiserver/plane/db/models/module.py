@@ -44,6 +44,7 @@ def get_default_display_properties():
         "labels": True,
         "link": True,
         "priority": True,
+        "workload": True,
         "start_date": True,
         "state": True,
         "sub_issue_count": True,

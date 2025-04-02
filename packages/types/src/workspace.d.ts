@@ -55,6 +55,7 @@ export type Properties = {
   priority: boolean;
   state: boolean;
   sub_issue_count: boolean;
+  workload: boolean;
   link: boolean;
   attachment_count: boolean;
   estimate: boolean;

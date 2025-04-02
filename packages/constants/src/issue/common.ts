@@ -14,6 +14,7 @@ export type TIssueFilterPriorityObject = {
 export enum EIssueGroupByToServerOptions {
   "state" = "state_id",
   "priority" = "priority",
+  "workload" = "workload",
   "labels" = "labels__id",
   "state_detail.group" = "state__group",
   "assignees" = "assignees__id",
@@ -28,6 +29,7 @@ export enum EIssueGroupByToServerOptions {
 export enum EIssueGroupBYServerToProperty {
   "state_id" = "state_id",
   "priority" = "priority",
+  "workload" = "workload",
   "labels__id" = "label_ids",
   "state__group" = "state__group",
   "assignees__id" = "assignee_ids",
@@ -100,6 +102,7 @@ export const ISSUE_PRIORITIES: {
 export const DRAG_ALLOWED_GROUPS: TIssueGroupByOptions[] = [
   "state",
   "priority",
+  "workload",
   "assignees",
   "labels",
   "module",
@@ -123,6 +126,7 @@ export const ISSUE_GROUP_BY_OPTIONS: {
   { key: "state", titleTranslationKey: "common.states" },
   { key: "state_detail.group", titleTranslationKey: "common.state_groups" },
   { key: "priority", titleTranslationKey: "common.priority" },
+  { key: "workload", titleTranslationKey: "common.workload" },
   { key: "team_project", titleTranslationKey: "common.team_project" }, // required this on team issues
   { key: "project", titleTranslationKey: "common.project" }, // required this on my issues
   { key: "cycle", titleTranslationKey: "common.cycle" }, // required this on my issues
@@ -143,6 +147,7 @@ export const ISSUE_ORDER_BY_OPTIONS: {
   { key: "start_date", titleTranslationKey: "common.order_by.start_date" },
   { key: "target_date", titleTranslationKey: "common.order_by.due_date" },
   { key: "-priority", titleTranslationKey: "common.priority" },
+  { key: "-workload", titleTranslationKey: "common.workload" },
 ];
 
 export const ISSUE_DISPLAY_PROPERTIES_KEYS: (keyof IIssueDisplayProperties)[] = [
@@ -152,6 +157,7 @@ export const ISSUE_DISPLAY_PROPERTIES_KEYS: (keyof IIssueDisplayProperties)[] = 
   "labels",
   "key",
   "priority",
+  "workload",
   "state",
   "sub_issue_count",
   "link",
@@ -193,6 +199,10 @@ export const ISSUE_DISPLAY_PROPERTIES: {
     key: "priority",
     titleTranslationKey: "common.priority",
   },
+  {
+    key: "workload",
+    titleTranslationKey: "common.workload",
+  },
   { key: "state", titleTranslationKey: "common.state" },
   {
     key: "sub_issue_count",
@@ -214,6 +224,7 @@ export const ISSUE_DISPLAY_PROPERTIES: {
 export const SPREADSHEET_PROPERTY_LIST: (keyof IIssueDisplayProperties)[] = [
   "state",
   "priority",
+  "workload",
   "assignee",
   "labels",
   "modules",
@@ -301,6 +312,14 @@ export const SPREADSHEET_PROPERTY_DETAILS: {
     descendingOrderKey: "-priority",
     descendingOrderTitle: "Urgent",
     icon: "Signal",
+  },
+  workload: {
+    i18n_title: "common.workload",
+    ascendingOrderKey: "workload",
+    ascendingOrderTitle: "None",
+    descendingOrderKey: "-workload",
+    descendingOrderTitle: "Urgent",
+    icon: "CalendarClock",
   },
   start_date: {
     i18n_title: "common.order_by.start_date",

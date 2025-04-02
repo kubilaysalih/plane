@@ -5,5 +5,6 @@ export * from "./date";
 export * from "./estimate";
 export * from "./module";
 export * from "./priority";
+export * from "./workload";
 export * from "./project";
 export * from "./state";
