@@ -1,19 +1,28 @@
-import { FC, ReactNode } from "react";
 import { Editor } from "@tiptap/react";
-// helpers
-import { cn } from "@/helpers/common";
+import { FC, ReactNode, useRef } from "react";
+// plane utils
+import { cn } from "@plane/utils";
+// constants
+import { DEFAULT_DISPLAY_CONFIG } from "@/constants/config";
+// types
+import { TDisplayConfig } from "@/types";
+// components
+import { LinkViewContainer } from "./link-view-container";
 
 interface EditorContainerProps {
-  editor: Editor | null;
-  editorContainerClassName: string;
   children: ReactNode;
-  hideDragHandle?: () => void;
+  displayConfig: TDisplayConfig;
+  editor: Editor;
+  editorContainerClassName: string;
+  id: string;
 }
 
 export const EditorContainer: FC<EditorContainerProps> = (props) => {
-  const { editor, editorContainerClassName, hideDragHandle, children } = props;
+  const { children, displayConfig, editor, editorContainerClassName, id } = props;
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleContainerClick = () => {
+  const handleContainerClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (event.target !== event.currentTarget) return;
     if (!editor) return;
     if (!editor.isEditable) return;
     try {
@@ -52,20 +61,34 @@ export const EditorContainer: FC<EditorContainerProps> = (props) => {
     }
   };
 
+  const handleContainerMouseLeave = () => {
+    const dragHandleElement = document.querySelector("#editor-side-menu");
+    if (!dragHandleElement?.classList.contains("side-menu-hidden")) {
+      dragHandleElement?.classList.add("side-menu-hidden");
+    }
+  };
+
   return (
-    <div
-      id="editor-container"
-      onClick={handleContainerClick}
-      onMouseLeave={hideDragHandle}
-      className={cn(
-        "cursor-text relative",
-        {
-          "active-editor": editor?.isFocused && editor?.isEditable,
-        },
-        editorContainerClassName
-      )}
-    >
-      {children}
-    </div>
+    <>
+      <div
+        ref={containerRef}
+        id={`editor-container-${id}`}
+        onClick={handleContainerClick}
+        onMouseLeave={handleContainerMouseLeave}
+        className={cn(
+          `editor-container cursor-text relative line-spacing-${displayConfig.lineSpacing ?? DEFAULT_DISPLAY_CONFIG.lineSpacing}`,
+          {
+            "active-editor": editor?.isFocused && editor?.isEditable,
+            "wide-layout": displayConfig.wideLayout,
+          },
+          displayConfig.fontSize ?? DEFAULT_DISPLAY_CONFIG.fontSize,
+          displayConfig.fontStyle ?? DEFAULT_DISPLAY_CONFIG.fontStyle,
+          editorContainerClassName
+        )}
+      >
+        {children}
+        <LinkViewContainer editor={editor} containerRef={containerRef} />
+      </div>
+    </>
   );
 };

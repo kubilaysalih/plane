@@ -4,13 +4,14 @@ import { FC, MouseEvent, useRef } from "react";
 import { observer } from "mobx-react";
 import { usePathname, useSearchParams } from "next/navigation";
 // icons
-import { Check, Info } from "lucide-react";
+import { Check } from "lucide-react";
 // types
 import type { TCycleGroups } from "@plane/types";
 // ui
 import { CircularProgressIndicator } from "@plane/ui";
 // components
 import { ListItem } from "@/components/core/list";
+import { CycleQuickActions } from "@/components/cycles/";
 import { CycleListItemAction } from "@/components/cycles/list";
 // helpers
 import { generateQueryParams } from "@/helpers/router.helper";
@@ -52,6 +53,7 @@ export const CyclesListItem: FC<TCyclesListItem> = observer((props) => {
   // TODO: change this logic once backend fix the response
   const cycleStatus = cycleDetails.status ? (cycleDetails.status.toLocaleLowerCase() as TCycleGroups) : "draft";
   const isCompleted = cycleStatus === "completed";
+  const isActive = cycleStatus === "current";
 
   const cycleTotalIssues =
     cycleDetails.backlog_issues +
@@ -70,10 +72,10 @@ export const CyclesListItem: FC<TCyclesListItem> = observer((props) => {
     e.stopPropagation();
 
     const query = generateQueryParams(searchParams, ["peekCycle"]);
-    if (searchParams.has("peekCycle")) {
-      router.push(`${pathname}?${query}`);
+    if (searchParams.has("peekCycle") && searchParams.get("peekCycle") === cycleId) {
+      router.push(`${pathname}?${query}`, {}, { showProgressBar: false });
     } else {
-      router.push(`${pathname}?${query && `${query}&`}peekCycle=${cycleId}`);
+      router.push(`${pathname}?${query && `${query}&`}peekCycle=${cycleId}`, {}, { showProgressBar: false });
     }
   };
 
@@ -105,14 +107,6 @@ export const CyclesListItem: FC<TCyclesListItem> = observer((props) => {
           )}
         </CircularProgressIndicator>
       }
-      appendTitleElement={
-        <button
-          onClick={openCycleOverview}
-          className={`z-[5] flex-shrink-0 ${isMobile ? "flex" : "hidden group-hover:flex"}`}
-        >
-          <Info className="h-4 w-4 text-custom-text-400" />
-        </button>
-      }
       actionableItems={
         <CycleListItemAction
           workspaceSlug={workspaceSlug}
@@ -120,10 +114,22 @@ export const CyclesListItem: FC<TCyclesListItem> = observer((props) => {
           cycleId={cycleId}
           cycleDetails={cycleDetails}
           parentRef={parentRef}
+          isActive={isActive}
         />
+      }
+      quickActionElement={
+        <div className="block md:hidden">
+          <CycleQuickActions
+            parentRef={parentRef}
+            cycleId={cycleId}
+            projectId={projectId}
+            workspaceSlug={workspaceSlug}
+          />
+        </div>
       }
       isMobile={isMobile}
       parentRef={parentRef}
+      isSidebarOpen={searchParams.has("peekCycle")}
     />
   );
 });

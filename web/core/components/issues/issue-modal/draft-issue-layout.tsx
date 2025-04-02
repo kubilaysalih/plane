@@ -4,44 +4,28 @@ import React, { useState } from "react";
 import isEmpty from "lodash/isEmpty";
 import { observer } from "mobx-react";
 import { useParams, usePathname } from "next/navigation";
+import { useTranslation } from "@plane/i18n";
+// types
 import type { TIssue } from "@plane/types";
-// hooks
+// ui
 import { TOAST_TYPE, setToast } from "@plane/ui";
+// components
 import { ConfirmIssueDiscard } from "@/components/issues";
-import { IssueFormRoot } from "@/components/issues/issue-modal/form";
+// helpers
 import { isEmptyHtmlString } from "@/helpers/string.helper";
-import { useEventTracker } from "@/hooks/store";
-// services
-import { IssueDraftService } from "@/services/issue";
+// hooks
+import { useIssueModal } from "@/hooks/context/use-issue-modal";
+import { useEventTracker, useWorkspaceDraftIssues } from "@/hooks/store";
+// local components
+import { IssueFormRoot, type IssueFormProps } from "./form";
 
-export interface DraftIssueProps {
+export interface DraftIssueProps extends IssueFormProps {
   changesMade: Partial<TIssue> | null;
-  data?: Partial<TIssue>;
-  issueTitleRef: React.MutableRefObject<HTMLInputElement | null>;
-  isCreateMoreToggleEnabled: boolean;
-  onCreateMoreToggleChange: (value: boolean) => void;
   onChange: (formData: Partial<TIssue> | null) => void;
-  onClose: (saveDraftIssueInLocalStorage?: boolean) => void;
-  onSubmit: (formData: Partial<TIssue>) => Promise<void>;
-  projectId: string;
-  isDraft: boolean;
 }
 
-const issueDraftService = new IssueDraftService();
-
 export const DraftIssueLayout: React.FC<DraftIssueProps> = observer((props) => {
-  const {
-    changesMade,
-    data,
-    issueTitleRef,
-    onChange,
-    onClose,
-    onSubmit,
-    projectId,
-    isCreateMoreToggleEnabled,
-    onCreateMoreToggleChange,
-    isDraft,
-  } = props;
+  const { changesMade, data, onChange, onClose, projectId } = props;
   // states
   const [issueDiscardModal, setIssueDiscardModal] = useState(false);
   // router params
@@ -50,33 +34,43 @@ export const DraftIssueLayout: React.FC<DraftIssueProps> = observer((props) => {
   const pathname = usePathname();
   // store hooks
   const { captureIssueEvent } = useEventTracker();
+  const { handleCreateUpdatePropertyValues } = useIssueModal();
+  const { createIssue } = useWorkspaceDraftIssues();
+  const { t } = useTranslation();
+
+  const sanitizeChanges = (): Partial<TIssue> => {
+    const sanitizedChanges = { ...changesMade };
+    Object.entries(sanitizedChanges).forEach(([key, value]) => {
+      const issueKey = key as keyof TIssue;
+      if (value === null || value === undefined || value === "") delete sanitizedChanges[issueKey];
+      if (typeof value === "object" && isEmpty(value)) delete sanitizedChanges[issueKey];
+      if (Array.isArray(value) && value.length === 0) delete sanitizedChanges[issueKey];
+      if (issueKey === "project_id") delete sanitizedChanges.project_id;
+      if (issueKey === "priority" && value && value === "none") delete sanitizedChanges.priority;
+      if (
+        issueKey === "description_html" &&
+        changesMade?.description_html &&
+        isEmptyHtmlString(changesMade.description_html, ["img"])
+      )
+        delete sanitizedChanges.description_html;
+    });
+    return sanitizedChanges;
+  };
 
   const handleClose = () => {
+    // If the user is updating an existing work item, we don't need to show the discard modal
     if (data?.id) {
-      onClose(false);
+      onClose();
       setIssueDiscardModal(false);
     } else {
       if (changesMade) {
-        Object.entries(changesMade).forEach(([key, value]) => {
-          const issueKey = key as keyof TIssue;
-          if (value === null || value === undefined || value === "") delete changesMade[issueKey];
-          if (typeof value === "object" && isEmpty(value)) delete changesMade[issueKey];
-          if (Array.isArray(value) && value.length === 0) delete changesMade[issueKey];
-          if (issueKey === "project_id") delete changesMade.project_id;
-          if (issueKey === "priority" && value && value === "none") delete changesMade.priority;
-          if (
-            issueKey === "description_html" &&
-            changesMade.description_html &&
-            isEmptyHtmlString(changesMade.description_html)
-          )
-            delete changesMade.description_html;
-        });
-        if (isEmpty(changesMade)) {
-          onClose(false);
+        const sanitizedChanges = sanitizeChanges();
+        if (isEmpty(sanitizedChanges)) {
+          onClose();
           setIssueDiscardModal(false);
         } else setIssueDiscardModal(true);
       } else {
-        onClose(false);
+        onClose();
         setIssueDiscardModal(false);
       }
     }
@@ -88,37 +82,56 @@ export const DraftIssueLayout: React.FC<DraftIssueProps> = observer((props) => {
     const payload = {
       ...changesMade,
       name: changesMade?.name && changesMade?.name?.trim() !== "" ? changesMade.name?.trim() : "Untitled",
+      project_id: projectId,
     };
 
-    await issueDraftService
-      .createDraftIssue(workspaceSlug.toString(), projectId.toString(), payload)
+    const response = await createIssue(workspaceSlug.toString(), payload)
       .then((res) => {
         setToast({
           type: TOAST_TYPE.SUCCESS,
-          title: "Success!",
-          message: "Draft Issue created successfully.",
+          title: `${t("success")}!`,
+          message: t("workspace_draft_issues.toasts.created.success"),
         });
         captureIssueEvent({
-          eventName: "Draft issue created",
+          eventName: "Draft work item created",
           payload: { ...res, state: "SUCCESS" },
           path: pathname,
         });
         onChange(null);
         setIssueDiscardModal(false);
-        onClose(false);
+        onClose();
+        return res;
       })
       .catch(() => {
         setToast({
           type: TOAST_TYPE.ERROR,
-          title: "Error!",
-          message: "Issue could not be created. Please try again.",
+          title: `${t("error")}!`,
+          message: t("workspace_draft_issues.toasts.created.error"),
         });
         captureIssueEvent({
-          eventName: "Draft issue created",
+          eventName: "Draft work item created",
           payload: { ...payload, state: "FAILED" },
           path: pathname,
         });
       });
+
+    if (response && handleCreateUpdatePropertyValues) {
+      handleCreateUpdatePropertyValues({
+        issueId: response.id,
+        issueTypeId: response.type_id,
+        projectId,
+        workspaceSlug: workspaceSlug?.toString(),
+        isDraft: true,
+      });
+    }
+  };
+
+  const handleDraftAndClose = () => {
+    const sanitizedChanges = sanitizeChanges();
+    if (!data?.id && !isEmpty(sanitizedChanges)) {
+      handleCreateDraftIssue();
+    }
+    onClose();
   };
 
   return (
@@ -130,20 +143,10 @@ export const DraftIssueLayout: React.FC<DraftIssueProps> = observer((props) => {
         onDiscard={() => {
           onChange(null);
           setIssueDiscardModal(false);
-          onClose(false);
+          onClose();
         }}
       />
-      <IssueFormRoot
-        isCreateMoreToggleEnabled={isCreateMoreToggleEnabled}
-        onCreateMoreToggleChange={onCreateMoreToggleChange}
-        data={data}
-        issueTitleRef={issueTitleRef}
-        onChange={onChange}
-        onClose={handleClose}
-        onSubmit={onSubmit}
-        projectId={projectId}
-        isDraft={isDraft}
-      />
+      <IssueFormRoot {...props} onClose={handleClose} handleDraftAndClose={handleDraftAndClose} />
     </>
   );
 });

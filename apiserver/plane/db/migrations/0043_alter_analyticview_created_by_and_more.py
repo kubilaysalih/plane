@@ -3,14 +3,13 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-from plane.db.models import IssueRelation
-from sentry_sdk import capture_exception
 import uuid
 
 
 def create_issue_relation(apps, schema_editor):
     try:
         IssueBlockerModel = apps.get_model("db", "IssueBlocker")
+        IssueRelation = apps.get_model("db", "IssueRelation")
         updated_issue_relation = []
         for blocked_issue in IssueBlockerModel.objects.all():
             updated_issue_relation.append(
@@ -29,7 +28,6 @@ def create_issue_relation(apps, schema_editor):
         )
     except Exception as e:
         print(e)
-        capture_exception(e)
 
 
 def update_issue_priority_choice(apps, schema_editor):

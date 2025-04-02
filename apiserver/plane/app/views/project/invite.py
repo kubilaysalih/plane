@@ -16,28 +16,24 @@ from rest_framework.permissions import AllowAny
 # Module imports
 from .base import BaseViewSet, BaseAPIView
 from plane.app.serializers import ProjectMemberInviteSerializer
-
-from plane.app.permissions import ProjectBasePermission
-
+from plane.app.permissions import allow_permission, ROLE
 from plane.db.models import (
     ProjectMember,
     Workspace,
     ProjectMemberInvite,
     User,
     WorkspaceMember,
-    IssueProperty,
+    Project,
+    IssueUserProperty,
 )
-
+from plane.db.models.project import ProjectNetwork
+from plane.utils.host import base_host
 
 class ProjectInvitationsViewset(BaseViewSet):
     serializer_class = ProjectMemberInviteSerializer
     model = ProjectMemberInvite
 
     search_fields = []
-
-    permission_classes = [
-        ProjectBasePermission,
-    ]
 
     def get_queryset(self):
         return self.filter_queryset(
@@ -49,34 +45,27 @@ class ProjectInvitationsViewset(BaseViewSet):
             .select_related("workspace", "workspace__owner")
         )
 
+    @allow_permission([ROLE.ADMIN])
     def create(self, request, slug, project_id):
         emails = request.data.get("emails", [])
 
         # Check if email is provided
         if not emails:
             return Response(
-                {"error": "Emails are required"},
-                status=status.HTTP_400_BAD_REQUEST,
+                {"error": "Emails are required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        requesting_user = ProjectMember.objects.get(
-            workspace__slug=slug,
-            project_id=project_id,
-            member_id=request.user.id,
-        )
+        for email in emails:
+            workspace_role = WorkspaceMember.objects.filter(
+                workspace__slug=slug, member__email=email.get("email"), is_active=True
+            ).role
 
-        # Check if any invited user has an higher role
-        if len(
-            [
-                email
-                for email in emails
-                if int(email.get("role", 10)) > requesting_user.role
-            ]
-        ):
-            return Response(
-                {"error": "You cannot invite a user with higher role"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            if workspace_role in [5, 20] and workspace_role != email.get("role", 5):
+                return Response(
+                    {
+                        "error": "You cannot invite a user with different role than workspace role"
+                    }
+                )
 
         workspace = Workspace.objects.get(slug=slug)
 
@@ -90,14 +79,11 @@ class ProjectInvitationsViewset(BaseViewSet):
                         project_id=project_id,
                         workspace_id=workspace.id,
                         token=jwt.encode(
-                            {
-                                "email": email,
-                                "timestamp": datetime.now().timestamp(),
-                            },
+                            {"email": email, "timestamp": datetime.now().timestamp()},
                             settings.SECRET_KEY,
                             algorithm="HS256",
                         ),
-                        role=email.get("role", 10),
+                        role=email.get("role", 5),
                         created_by=request.user,
                     )
                 )
@@ -113,7 +99,7 @@ class ProjectInvitationsViewset(BaseViewSet):
         project_invitations = ProjectMemberInvite.objects.bulk_create(
             project_invitations, batch_size=10, ignore_conflicts=True
         )
-        current_site = request.META.get("HTTP_ORIGIN")
+        current_site = base_host(request=request, is_app=True)
 
         # Send invitations
         for invitation in project_invitations:
@@ -126,10 +112,7 @@ class ProjectInvitationsViewset(BaseViewSet):
             )
 
         return Response(
-            {
-                "message": "Email sent successfully",
-            },
-            status=status.HTTP_200_OK,
+            {"message": "Email sent successfully"}, status=status.HTTP_200_OK
         )
 
 
@@ -145,24 +128,36 @@ class UserProjectInvitationsViewset(BaseViewSet):
             .select_related("workspace", "workspace__owner", "project")
         )
 
+    @allow_permission([ROLE.ADMIN, ROLE.MEMBER], level="WORKSPACE")
     def create(self, request, slug):
         project_ids = request.data.get("project_ids", [])
 
         # Get the workspace user role
         workspace_member = WorkspaceMember.objects.get(
-            member=request.user,
-            workspace__slug=slug,
-            is_active=True,
+            member=request.user, workspace__slug=slug, is_active=True
         )
+
+        # Get all the projects
+        projects = Project.objects.filter(
+            id__in=project_ids, workspace__slug=slug
+        ).only("id", "network")
+        # Check if user has permission to join each project
+        for project in projects:
+            if (
+                project.network == ProjectNetwork.SECRET.value
+                and workspace_member.role != ROLE.ADMIN.value
+            ):
+                return Response(
+                    {"error": "Only workspace admins can join private project"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
         workspace_role = workspace_member.role
         workspace = workspace_member.workspace
 
         # If the user was already part of workspace
         _ = ProjectMember.objects.filter(
-            workspace__slug=slug,
-            project_id__in=project_ids,
-            member=request.user,
+            workspace__slug=slug, project_id__in=project_ids, member=request.user
         ).update(is_active=True)
 
         ProjectMember.objects.bulk_create(
@@ -170,7 +165,7 @@ class UserProjectInvitationsViewset(BaseViewSet):
                 ProjectMember(
                     project_id=project_id,
                     member=request.user,
-                    role=15 if workspace_role >= 15 else 10,
+                    role=workspace_role,
                     workspace=workspace,
                     created_by=request.user,
                 )
@@ -179,9 +174,9 @@ class UserProjectInvitationsViewset(BaseViewSet):
             ignore_conflicts=True,
         )
 
-        IssueProperty.objects.bulk_create(
+        IssueUserProperty.objects.bulk_create(
             [
-                IssueProperty(
+                IssueUserProperty(
                     project_id=project_id,
                     user=request.user,
                     workspace=workspace,
@@ -193,21 +188,16 @@ class UserProjectInvitationsViewset(BaseViewSet):
         )
 
         return Response(
-            {"message": "Projects joined successfully"},
-            status=status.HTTP_201_CREATED,
+            {"message": "Projects joined successfully"}, status=status.HTTP_201_CREATED
         )
 
 
 class ProjectJoinEndpoint(BaseAPIView):
-    permission_classes = [
-        AllowAny,
-    ]
+    permission_classes = [AllowAny]
 
     def post(self, request, slug, project_id, pk):
         project_invite = ProjectMemberInvite.objects.get(
-            pk=pk,
-            project_id=project_id,
-            workspace__slug=slug,
+            pk=pk, project_id=project_id, workspace__slug=slug
         )
 
         email = request.data.get("email", "")
@@ -236,11 +226,7 @@ class ProjectJoinEndpoint(BaseAPIView):
                     _ = WorkspaceMember.objects.create(
                         workspace_id=project_invite.workspace_id,
                         member=user,
-                        role=(
-                            15
-                            if project_invite.role >= 15
-                            else project_invite.role
-                        ),
+                        role=(15 if project_invite.role >= 15 else project_invite.role),
                     )
                 else:
                     # Else make him active
