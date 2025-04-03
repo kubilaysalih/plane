@@ -5,6 +5,7 @@ export type TIssueLayouts = "list" | "kanban" | "calendar" | "spreadsheet" | "ga
 export type TIssueGroupByOptions =
   | "state"
   | "priority"
+  | "workload"
   | "labels"
   | "created_by"
   | "state_detail.group"
