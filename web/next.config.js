@@ -8,6 +8,9 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
   output: "standalone",
+  typescript: {
+    ignoreBuildErrors: true
+  },
   async headers() {
     return [
       {

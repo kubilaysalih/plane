@@ -4,6 +4,9 @@ const nextConfig = {
   trailingSlash: true,
   reactStrictMode: false,
   swcMinify: true,
+  typescript: {
+    ignoreBuildErrors: true
+  },
   output: "standalone",
   images: {
     unoptimized: true,

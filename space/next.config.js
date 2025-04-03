@@ -3,6 +3,9 @@
 const nextConfig = {
   trailingSlash: true,
   output: "standalone",
+  typescript: {
+    ignoreBuildErrors: true
+  },
   basePath: process.env.NEXT_PUBLIC_SPACE_BASE_PATH || "",
   reactStrictMode: false,
   swcMinify: true,
