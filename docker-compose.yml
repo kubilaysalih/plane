@@ -51,6 +51,7 @@ services:
     depends_on:
       - plane-db
       - plane-redis
+      - plane-mq
 
   worker:
     container_name: bgworker
@@ -91,7 +92,7 @@ services:
       dockerfile: Dockerfile.api
       args:
         DOCKER_BUILDKIT: 1
-    restart: no
+    restart: "no"
     command: ./bin/docker-entrypoint-migrator.sh
     env_file:
       - ./apiserver/.env
