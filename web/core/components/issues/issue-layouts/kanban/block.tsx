@@ -77,9 +77,19 @@ const KanbanIssueDetailsBlock: React.FC<IssueDetailsBlockProps> = observer((prop
   const imageComponentMatch = issue.description_html?.match(/<image-component[^>]*src="([^"]*)"[^>]*>/);
   const imgTagMatch = issue.description_html?.match(/<img[^>]+src="([^">]+)"/);
   const imagePath = (imageComponentMatch || imgTagMatch || [])?.[1];
+
+  // Check if the image path is a full URL
+  const isFullUrl = imagePath?.startsWith('http://') || imagePath?.startsWith('https://');
+
   // Get the workspace slug from the router params
   const { workspaceSlug } = useParams();
-  const assetUrl = imagePath ? `/api/assets/v2/workspaces/${workspaceSlug}/projects/${issue.project_id}/${imagePath}/` : null;
+
+  // If it's a full URL, use it directly, otherwise construct the asset URL
+  const assetUrl = imagePath
+    ? isFullUrl
+      ? imagePath
+      : `/api/assets/v2/workspaces/${workspaceSlug}/projects/${issue.project_id}/${imagePath}/`
+    : null;
 
   // Extract Spotify and YouTube links from description
   const spotifyMatch = issue.description_html?.match(/https:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)/);
@@ -100,31 +110,73 @@ const KanbanIssueDetailsBlock: React.FC<IssueDetailsBlockProps> = observer((prop
 
   // Fetch the signed URL when the component mounts or when assetUrl changes
   useEffect(() => {
-    if (!assetUrl) return;
+    // Ensure this code only runs in the browser
+    if (typeof window === 'undefined' || !assetUrl) return;
+
+    let isMounted = true;
+
+    // Function to fix malformed URLs that have two URLs concatenated
+    const fixMalformedUrl = (url: string) => {
+      // Check if the URL contains two http/https protocols
+      if (url.indexOf('http', 10) !== -1) {
+        // Find the second occurrence of http or https
+        const secondHttpIndex = url.indexOf('http', 10);
+        // Return only the part after the second http
+        return url.substring(secondHttpIndex);
+      }
+      return url;
+    };
 
     // Function to fetch the signed URL
     const fetchSignedUrl = async () => {
       try {
+        // If it's already a full URL, we might not need to fetch a signed URL
+        if (isFullUrl) {
+          setSignedImageUrl(fixMalformedUrl(assetUrl));
+          return;
+        }
+
         // Make a request to the API to get the signed URL
-        const response = await fetch(assetUrl);
+        const response = await fetch(assetUrl, {
+          credentials: 'include', // Include cookies for authentication
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
+
+        // Only update state if component is still mounted
+        if (!isMounted) return;
 
         // The response is a 302 redirect with a Location header containing the signed URL
         if (response.redirected) {
           // If the response was redirected, use the final URL
-          setSignedImageUrl(response.url);
+          const redirectUrl = fixMalformedUrl(response.url);
+          setSignedImageUrl(redirectUrl);
         } else if (response.headers && response.headers.get('Location')) {
           // If we can access the Location header directly
-          setSignedImageUrl(response.headers.get('Location'));
+          const locationUrl = fixMalformedUrl(response.headers.get('Location') || '');
+          setSignedImageUrl(locationUrl);
+        } else if (response.ok) {
+          // If the response is OK but not redirected, try to use the URL directly
+          setSignedImageUrl(assetUrl);
         } else {
           console.error("Failed to get signed URL from response");
         }
       } catch (error) {
-        console.error("Error fetching signed URL:", error);
+        if (isMounted) {
+          console.error("Error fetching signed URL:", error);
+        }
       }
     };
 
     fetchSignedUrl();
-  }, [assetUrl]);
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
+  }, [assetUrl, isFullUrl]);
 
   return (
     <>
