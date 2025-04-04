@@ -176,7 +176,7 @@ const KanbanIssueDetailsBlock: React.FC<IssueDetailsBlockProps> = observer((prop
     return () => {
       isMounted = false;
     };
-  }, [assetUrl, isFullUrl]);
+  }, []);
 
   return (
     <>
@@ -402,13 +402,8 @@ export const KanbanIssueBlock: React.FC<IssueBlockProps> = observer((props) => {
           onClick={() => handleIssuePeekOverview(issue)}
           disabled={!!issue?.tempId}
         >
-          <RenderIfVisible
-            classNames="space-y-2 px-3 py-2"
-            root={scrollableContainerRef}
-            defaultHeight="100px"
-            horizontalOffset={100}
-            verticalOffset={200}
-            defaultValue={shouldRenderByDefault}
+          <div
+            className="space-y-2 px-3 py-2"
           >
             <KanbanIssueDetailsBlock
               cardRef={cardRef}
@@ -419,7 +414,7 @@ export const KanbanIssueBlock: React.FC<IssueBlockProps> = observer((props) => {
               isReadOnly={!canEditIssueProperties}
               isEpic={isEpic}
             />
-          </RenderIfVisible>
+          </div>
         </ControlLink>
       </div>
     </>
