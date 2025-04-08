@@ -27,6 +27,7 @@ import {
   IssueAttachmentActivity,
   IssueArchivedAtActivity,
   IssueInboxActivity,
+  IssueWorkloadActivity,
 } from "./actions";
 
 type TIssueActivityItem = {
@@ -60,6 +61,8 @@ export const IssueActivityItem: FC<TIssueActivityItem> = observer((props) => {
       return <IssueAssigneeActivity {...componentDefaultProps} showIssue={false} />;
     case "priority":
       return <IssuePriorityActivity {...componentDefaultProps} showIssue={false} />;
+    case "workload":
+      return <IssueWorkloadActivity {...componentDefaultProps} showIssue={false} />;
     case "estimate_point":
       return <IssueEstimateActivity {...componentDefaultProps} showIssue={false} />;
     case "parent":

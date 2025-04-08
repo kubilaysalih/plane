@@ -806,6 +806,7 @@ class IssueRetrievePublicEndpoint(BaseAPIView):
                 "assignee_ids",
                 "estimate_point",
                 "priority",
+                "workload,"
                 "start_date",
                 "target_date",
                 "sequence_id",

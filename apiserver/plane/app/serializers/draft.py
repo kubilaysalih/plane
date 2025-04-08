@@ -245,6 +245,7 @@ class DraftIssueSerializer(BaseSerializer):
             "completed_at",
             "estimate_point",
             "priority",
+            "workload",
             "start_date",
             "target_date",
             "project_id",

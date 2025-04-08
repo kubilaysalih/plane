@@ -182,6 +182,32 @@ def track_priority(
             )
         )
 
+# Track changes in priority
+def track_workload(
+    requested_data,
+    current_instance,
+    issue_id,
+    project_id,
+    workspace_id,
+    actor_id,
+    issue_activities,
+    epoch,
+):
+    if current_instance.get("workload") != requested_data.get("workload"):
+        issue_activities.append(
+            IssueActivity(
+                issue_id=issue_id,
+                actor_id=actor_id,
+                verb="updated",
+                old_value=current_instance.get("workload"),
+                new_value=requested_data.get("workload"),
+                field="workload",
+                project_id=project_id,
+                workspace_id=workspace_id,
+                comment="updated the workload to",
+                epoch=epoch,
+            )
+        )
 
 # Track changes in state of the issue
 def track_state(
@@ -607,6 +633,7 @@ def update_issue_activity(
         "name": track_name,
         "parent_id": track_parent,
         "priority": track_priority,
+        "workload": track_workload,
         "state_id": track_state,
         "description_html": track_description,
         "target_date": track_target_date,

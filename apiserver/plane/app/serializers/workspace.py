@@ -195,6 +195,7 @@ class IssueRecentVisitSerializer(serializers.ModelSerializer):
             "name",
             "state",
             "priority",
+            "workload",
             "assignees",
             "type",
             "sequence_id",

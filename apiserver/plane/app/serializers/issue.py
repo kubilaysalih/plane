@@ -354,7 +354,7 @@ class IssueRelationSerializer(BaseSerializer):
             "name",
             "state_id",
             "priority",
-            "workload"
+            "workload",
             "assignee_ids",
         ]
         read_only_fields = ["workspace", "project"]
