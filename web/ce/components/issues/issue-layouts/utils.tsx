@@ -31,6 +31,7 @@ import {
   SpreadsheetStateColumn,
   SpreadsheetSubIssueColumn,
   SpreadsheetUpdatedOnColumn,
+  SpreadsheetWorkloadColumn
 } from "@/components/issues/issue-layouts/spreadsheet";
 
 export const getTeamProjectColumns = (): IGroupByColumn[] | undefined => undefined;
@@ -55,6 +56,7 @@ export const SPREADSHEET_COLUMNS: { [key in keyof IIssueDisplayProperties]: TSpr
   assignee: SpreadsheetAssigneeColumn,
   created_on: SpreadsheetCreatedOnColumn,
   due_date: SpreadsheetDueDateColumn,
+  workload: SpreadsheetWorkloadColumn,
   estimate: SpreadsheetEstimateColumn,
   labels: SpreadsheetLabelColumn,
   modules: SpreadsheetModuleColumn,
